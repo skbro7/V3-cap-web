@@ -1,14 +1,13 @@
-import 'dart:typed_data'; // Needed for download
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
 import 'package:image/image.dart' as img;
-import 'package:url_launcher/url_launcher.dart'; // To open the ad link
-import 'package:universal_html/html.dart' as html; // To trigger download on web
+import 'package:url_launcher/url_launcher.dart';
+import 'package:universal_html/html.dart' as html;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  // This will enforce portrait mode on mobile devices. It has no effect on web browsers.
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -46,7 +45,6 @@ class _CameraScreenState extends State<CameraScreen> {
   bool _isProcessing = false;
   String? _lastThumbnailUrl;
   
-  // Your Adsterra Smartlink
   final Uri _adUrl = Uri.parse('https://www.effectivegatecpm.com/euwk6tje?key=aeab73654d8b3c188f6d4ed2b26fdfda');
 
   @override
@@ -74,40 +72,32 @@ class _CameraScreenState extends State<CameraScreen> {
     return _controller!.initialize();
   }
 
-  // This is the main function that handles the ad and download
   Future<void> _onCaptureAndDownload() async {
     if (_isProcessing || _controller == null || !_controller!.value.isInitialized) return;
     
     try {
       setState(() => _isProcessing = true);
 
-      // Step 1: Show the Ad in a new tab
       await launchUrl(_adUrl, webOnlyWindowName: '_blank');
 
-      // Step 2: Take the picture
       final XFile rawFile = await _controller!.takePicture();
       final bytes = await rawFile.readAsBytes();
 
-      // Step 3: Apply the filter
       final filteredBytes = await _processImage(bytes);
 
-      // Step 4: Trigger the download in the browser
       _triggerDownload(filteredBytes, 'v3-cap-image.jpg');
 
-      // Update the thumbnail (optional, but good for UX)
       if (mounted) {
         setState(() {
-          _lastThumbnailUrl = rawFile.path; // rawFile.path is a blob URL on web
+          _lastThumbnailUrl = rawFile.path;
           _isProcessing = false;
         });
       }
     } catch (e) {
-      debugPrint("Error during capture: $e");
       if (mounted) setState(() => _isProcessing = false);
     }
   }
 
-  // Helper function to trigger download on web
   void _triggerDownload(Uint8List data, String downloadName) {
     final base64 = html.base64Encode(data);
     final anchor = html.AnchorElement(href: 'data:application/octet-stream;base64,$base64')
@@ -194,7 +184,7 @@ class _CameraScreenState extends State<CameraScreen> {
             children: [
               _buildGalleryThumbnail(),
               _buildShutterButton(),
-              const SizedBox(width: 55), // Placeholder for alignment
+              const SizedBox(width: 55),
             ],
           ),
         ),
