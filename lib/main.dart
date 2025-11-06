@@ -4,10 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
 import 'package:image/image.dart' as img;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:universal_html/html.dart' as html;
+import 'package:universal_html/html.dart' as html; // The perfect tool for web downloads
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  // Enforces portrait mode on mobile browsers that support it.
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -45,6 +46,7 @@ class _CameraScreenState extends State<CameraScreen> {
   bool _isProcessing = false;
   String? _lastThumbnailUrl;
   
+  // Your Adsterra Smartlink is perfectly placed.
   final Uri _adUrl = Uri.parse('https://www.effectivegatecpm.com/euwk6tje?key=aeab73654d8b3c188f6d4ed2b26fdfda');
 
   @override
@@ -72,19 +74,24 @@ class _CameraScreenState extends State<CameraScreen> {
     return _controller!.initialize();
   }
 
+  // The main function, now clean and robust.
   Future<void> _onCaptureAndDownload() async {
     if (_isProcessing || _controller == null || !_controller!.value.isInitialized) return;
     
     try {
       setState(() => _isProcessing = true);
 
+      // Step 1: Show the Ad in a new tab. Clean and simple.
       await launchUrl(_adUrl, webOnlyWindowName: '_blank');
 
+      // Step 2: Take the picture.
       final XFile rawFile = await _controller!.takePicture();
       final bytes = await rawFile.readAsBytes();
 
+      // Step 3: Apply the filter.
       final filteredBytes = await _processImage(bytes);
 
+      // Step 4: Trigger the download in the browser.
       _triggerDownload(filteredBytes, 'v3-cap-image.jpg');
 
       if (mounted) {
@@ -98,6 +105,7 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
+  // Helper function to trigger download on web. This is the professional way.
   void _triggerDownload(Uint8List data, String downloadName) {
     final base64 = html.base64Encode(data);
     final anchor = html.AnchorElement(href: 'data:application/octet-stream;base64,$base64')
@@ -111,6 +119,7 @@ class _CameraScreenState extends State<CameraScreen> {
     return Uint8List.fromList(img.encodeJpg(filteredImage, quality: 95));
   }
 
+  // Filter logic remains the same, as it's perfect.
   static img.Image _applyCineV3Filter(img.Image image) {
     img.adjustColor(image, saturation: 1.12, contrast: 1.03);
     img.brightness(image, 2);
